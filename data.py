@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 import os, requests, pprint
+import aiohttp
+import asyncio
 
 
 load_dotenv()
@@ -7,7 +9,7 @@ load_dotenv()
 PF_TOKEN = os.environ.get("PF_TOKEN")
 PF_URL = os.environ.get("PF_URL")
 
-def price():
+async def price():
     url = f"{PF_URL}/directory/1430/entry/list"
 
     headers = {
@@ -18,19 +20,23 @@ def price():
     body = {
       "offset": 0,
       "pageSize": 100,
-      "fields": "name,4304,key,",
+      "fields": "name,4304,key",
     }
-    response = requests.post(url, headers=headers, data=body)
-    return response.json()
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, json=body) as response:
+            return await response.json()
 
-# Получаем данные
-data = price()
-print(data)
+print(asyncio.run(price()))
 
 
-# Проверяем, что данные получены и выводим только id
-if isinstance(data, list):  # Если результат - это список
-    for item in data:
-        print(item.get('value'))  # Выводим только id
-else:
-    print(data.get('value'))  # Если результат - это один объект
+# values = []
+# for entry in response.get('directoryEntries', []):
+#     custom_field_data = entry.get('customFieldData', [])
+#     for field_data in custom_field_data:
+#         value = field_data.get('value')
+#         if value:
+#             values.append(value)
+#
+# # Вывод значений
+# for value in values:
+#     print(value)
