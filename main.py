@@ -1,5 +1,8 @@
 import asyncio, requests
 from aiogram import Bot, Dispatcher, types
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+
 from handlers.user_private import user_private_router
 
 from dotenv import load_dotenv
