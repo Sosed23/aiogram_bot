@@ -2,8 +2,9 @@ import asyncio, requests
 from aiogram import Bot, Dispatcher, types
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-
+from database.engine import create_db, drop_db, session_maker
 from handlers.user_private import user_private_router
+
 
 from dotenv import load_dotenv
 import os
@@ -28,6 +29,11 @@ dp.include_router(user_private_router)
 
 
 async def main():
+
+    # await drop_db()
+    await create_db()
+
+
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, allowed_updates=['*'])
 

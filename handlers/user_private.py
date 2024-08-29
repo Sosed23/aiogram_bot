@@ -17,8 +17,6 @@ import os
 load_dotenv()
 
 
-# bot = Bot(token=os.environ.get("BOT_TOKEN"), parse_mode=ParseMode.MARKDOWN_V2,)
-
 user_private_router = Router()
 
 
@@ -75,6 +73,19 @@ async def catalog_cmd(message: types.Message):
     data = await catalog()
     await get_first_ten_elements_with_info(data)
 
+
+@user_private_router.message(Command('get'))
+async def get_photo(message: types.Message):
+    await message.answer_photo(photo='https://megacvet24.ru/image/catalog/gipsofila-golubaya-i-orhideya-kosmos-sinyaya.jpg',
+                               caption='Это ФОТО')
+
+
+@user_private_router.message(F.photo)
+async def get_photo(message: types.Message):
+    await message.answer(f'ID фото: {message.photo[-1].file_id}')
+
+
+
 @user_private_router.callback_query(F.data.startswith('delete_'))
 async def delete_product(callback: types.CallbackQuery):
     product_id = callback.data.split('_')[-1]
@@ -82,9 +93,13 @@ async def delete_product(callback: types.CallbackQuery):
     await callback.message.answer(f'Товар удален!{product_id}')
 
 
-# @user_private_router.callback_query(lambda c: True)
-# async def process_callback(callback_query: types.CallbackQuery):
-#     message_text = callback_query.data  # Извлечение текста сообщения из callback_data
-#     await bot.answer_callback_query(callback_query.id, text='Вы нажали кнопку!')
-#     await bot.send_message(callback_query.from_user.id, f'Вы передали сообщение: {message_text}')
+@user_private_router.message(F.text.lower() == 'кар')
+async def cars(message: types.Message):
+    await message.answer('Инлайн-кнопки', reply_markup=inline.inline_cars())
 
+
+@user_private_router.callback_query(F.data.startswith('car_'))
+async def delete_product(callback: types.CallbackQuery):
+    product_id = callback.data.split('_')[-1]
+    await callback.answer('Товар удален')
+    await callback.message.answer(f'Товар удален!{product_id}')
