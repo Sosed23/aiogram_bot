@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
-
+import asyncio
 # from megacvet_json import results
 from database.orm_query import orm_get_categories, get_categories
 
@@ -62,5 +62,8 @@ def inline_cars():
 async def categories():
     all_categories = await get_categories()
     for category in all_categories:
-        name = f"{category['name']}"
+        name = f"{category.name}"
         print(name)
+
+if __name__ == "__main__":
+    asyncio.run(get_categories())

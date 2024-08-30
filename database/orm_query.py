@@ -214,5 +214,5 @@ async def orm_reduce_product_in_cart(session: AsyncSession, user_id: int, produc
         return False
 
 
-if __name__ == "__main__":
-    asyncio.run(get_categories())
+# if __name__ == "__main__":
+#     asyncio.run(get_categories())
