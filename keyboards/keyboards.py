@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardButton, ReplyKeyboardMarkup
-from aiogram.utils.keyboard import InlineKeyboardBuilder, KeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder, KeyboardButton, InlineKeyboardMarkup
 # from database.query import get_categories
 from database.query_postgresql import get_categories, get_category_product
 
@@ -37,3 +37,7 @@ async def products(category_id):
         keydoard.add(InlineKeyboardButton(text=product.name, callback_data=f"product_{product.id}"))
     keydoard.add(InlineKeyboardButton(text='На главную', callback_data='to_main'))
     return keydoard.adjust(2).as_markup()
+
+
+cart = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Добавить в корзину', callback_data='cart')]])

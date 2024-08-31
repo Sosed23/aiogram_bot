@@ -5,7 +5,7 @@ from aiogram.filters import CommandStart, Command, or_f
 from aiogram.types import InlineQueryResultArticle, InlineQuery, InputTextMessageContent
 from aiogram.utils import markdown
 
-from data import price
+# from data import price
 import aiohttp
 import asyncio
 from keyboards import reply
@@ -25,20 +25,30 @@ user_private_router = Router()
 @user_private_router.message(CommandStart())
 async def start_cmd(message: types.Message):
     await message.answer('Привет, я вируальный помощник!', reply_markup=kb.main)
+    first_name = message.from_user.first_name
+    last_name = message.from_user.last_name
+    await rq.add_user(message.from_user.id, first_name, last_name)
 
 
-@user_private_router.message(or_f(Command('menu'), (F.text.lower() == 'меню')))
-async def echo(message: types.Message):
-    await message.answer("Это меню", reply_markup=reply.del_kb)
+@user_private_router.callback_query(F.data.startswith('cart_'))
+async def category(callback: types.CallbackQuery):
+    product_data = await rq.get_product(callback.data.split('_')[1])
+    await callback.answer(f'Вы выбрали товар: {product_data.name}')
+
+
+
+# @user_private_router.message(or_f(Command('menu'), (F.text.lower() == 'меню')))
+# async def echo(message: types.Message):
+#     await message.answer("Это меню", reply_markup=reply.del_kb)
     # Асинхронно вызываем функцию price и обрабатываем данные
-    data_j = await price()
-
-    values = []
-    for entry in data_j.get('directoryEntries', []):
-        custom_field_data = entry.get('customFieldData', [])
-        for field_data in custom_field_data:
-            value = field_data.get('value')
-            await message.answer(f"Полученные данные:\n{field_data}", reply_markup=inline.inline_kb())
+    # data_j = await price()
+    #
+    # values = []
+    # for entry in data_j.get('directoryEntries', []):
+    #     custom_field_data = entry.get('customFieldData', [])
+    #     for field_data in custom_field_data:
+    #         value = field_data.get('value')
+    #         await message.answer(f"Полученные данные:\n{field_data}", reply_markup=inline.inline_kb())
     #         if value:
     #             values.append(value)
     #
@@ -76,15 +86,15 @@ async def echo(message: types.Message):
 #     await get_first_ten_elements_with_info(data)
 
 
-@user_private_router.message(Command('get'))
-async def get_photo(message: types.Message):
-    await message.answer_photo(photo='https://megacvet24.ru/image/catalog/gipsofila-golubaya-i-orhideya-kosmos-sinyaya.jpg',
-                               caption='Это ФОТО')
-
-
-@user_private_router.message(F.photo)
-async def get_photo(message: types.Message):
-    await message.answer(f'ID фото: {message.photo[-1].file_id}')
+# @user_private_router.message(Command('get'))
+# async def get_photo(message: types.Message):
+#     await message.answer_photo(photo='https://megacvet24.ru/image/catalog/gipsofila-golubaya-i-orhideya-kosmos-sinyaya.jpg',
+#                                caption='Это ФОТО')
+#
+#
+# @user_private_router.message(F.photo)
+# async def get_photo(message: types.Message):
+#     await message.answer(f'ID фото: {message.photo[-1].file_id}')
 
 
 @user_private_router.callback_query(F.data.startswith('delete_'))
@@ -125,3 +135,5 @@ async def category(callback: types.CallbackQuery):
     await callback.message.answer(f'Название: {product_data.name}\nОписание: {product_data.description}\n'
                                   f'Цена: {product_data.price}\n{product_data.image}',
                                   reply_markup=await kb.products(callback.data.split('_')[1]))
+
+
