@@ -1,5 +1,6 @@
 from database.engine import session_maker
 from sqlalchemy import select, update, delete
+from sqlalchemy.orm import joinedload
 from database.models import Category, Product, User, Cart
 
 
@@ -31,12 +32,34 @@ async def add_user(user_id: int, first_name: str, last_name: str):
 
 #################### КОРЗИНА ########################
 
+
 async def get_cart_user(user_id):
     async with session_maker() as session:
-        return await session.scalars(select(Cart).where(Cart.user_id == int(user_id)))
+        # return await session.scalars(select(Cart).where(Cart.user_id == int(user_id)))
+        query = select(Cart).where(Cart.user_id == user_id).options(joinedload(Cart.product))
+        result = await session.scalars(query)
+        return result.all()
 
 
 async def add_cart(user_id: int,product_id: int, quantity: int):
     async with session_maker() as session:
-        session.add(Cart(user_id=user_id, product_id=product_id, quantity=quantity))
+        # session.add(Cart(user_id=user_id, product_id=product_id, quantity=quantity))
+        # await session.commit()
+        query = select(Cart).where(Cart.user_id == user_id, Cart.product_id == product_id).options(
+            joinedload(Cart.product))
+        cart = await session.execute(query)
+        cart = cart.scalar()
+        if cart:
+            cart.quantity += 1
+            await session.commit()
+            return cart
+        else:
+            session.add(Cart(user_id=user_id, product_id=product_id, quantity=1))
+            await session.commit()
+
+
+async def delete_cart_product(pr_id: int):
+    async with session_maker() as session:
+        stmt = delete(Cart).where(Cart.id == int(pr_id))
+        await session.execute(stmt)
         await session.commit()

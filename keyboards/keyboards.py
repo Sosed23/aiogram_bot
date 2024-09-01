@@ -32,12 +32,11 @@ async def categories():
 
 async def products(category_id):
     all_products = await get_category_product(category_id)
-    keydoard = InlineKeyboardBuilder()
+    keyboard = InlineKeyboardBuilder()
     for product in all_products:
-        keydoard.add(InlineKeyboardButton(text=product.name, callback_data=f"product_{product.id}"))
-    keydoard.add(InlineKeyboardButton(text='На главную', callback_data='to_main'))
-    return keydoard.adjust(2).as_markup()
+        keyboard.add(InlineKeyboardButton(text=product.name, callback_data=f"product_{product.id}"))
+    keyboard.add(InlineKeyboardButton(text='На главную', callback_data='to_main'))
+    return keyboard.adjust(2).as_markup()
 
 
-cart = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Добавить в корзину', callback_data='cart')]])
+
