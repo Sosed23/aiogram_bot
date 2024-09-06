@@ -14,6 +14,12 @@ async def get_category_product(category_id):
         return await session.scalars(select(Product).where(Product.category_id == int(category_id)))
 
 
+async def get_category_name(category_id):
+    async with session_maker() as session:
+        result = await session.execute(select(Category.name).where(Category.id == int(category_id)))
+        return result.scalar()
+
+
 ################ ПРОДУКТ ##################
 
 async def get_product(product_id):
@@ -41,7 +47,13 @@ async def get_cart_user(user_id):
         return result.all()
 
 
-async def add_cart(user_id: int,product_id: int, quantity: int):
+async def get_cart_product_user(user_id: int, product_id: int):
+    async with session_maker() as session:
+        result = await session.execute(select(Cart).where(Cart.user_id == user_id, Cart.product_id == product_id))
+        return result.scalar_one_or_none()
+
+
+async def add_cart(user_id: int, product_id: int, quantity: int):
     async with session_maker() as session:
         # session.add(Cart(user_id=user_id, product_id=product_id, quantity=quantity))
         # await session.commit()
