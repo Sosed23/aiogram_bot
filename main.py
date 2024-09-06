@@ -5,7 +5,6 @@ from aiogram.enums import ParseMode
 from database.engine import create_db, drop_db, session_maker
 # from handlers.user_private import user_private_router
 from handlers.handlers import router
-from database.models_sqlite import async_main
 
 from dotenv import load_dotenv
 import os
