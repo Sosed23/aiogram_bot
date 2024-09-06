@@ -36,7 +36,6 @@ async def main():
     # await drop_db()
     await create_db()
 
-    await async_main()
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, allowed_updates=['*'])
