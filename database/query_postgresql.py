@@ -24,7 +24,8 @@ async def get_category_name(category_id):
 
 async def get_product(product_id):
     async with session_maker() as session:
-        return await session.scalar(select(Product).where(Product.id == int(product_id)))
+        result = await session.execute(select(Product).where(Product.id == int(product_id)))
+        return result.scalar_one_or_none()
 
 
 async def add_user(user_id: int, first_name: str, last_name: str):
@@ -50,6 +51,11 @@ async def get_cart_user(user_id):
 async def get_cart_product_user(user_id: int, product_id: int):
     async with session_maker() as session:
         result = await session.execute(select(Cart).where(Cart.user_id == user_id, Cart.product_id == product_id))
+        return result.scalar_one_or_none()
+
+async def get_cart_id_user(user_id: int, cart_id: int):
+    async with session_maker() as session:
+        result = await session.execute(select(Cart).where(Cart.user_id == user_id, Cart.id == cart_id))
         return result.scalar_one_or_none()
 
 

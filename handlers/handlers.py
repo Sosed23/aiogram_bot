@@ -28,7 +28,7 @@ async def cmd_start(message: Message):
     last_name = message.from_user.last_name
     await rq.add_user(message.from_user.id, first_name, last_name)
     await message.answer('Добро пожаловать в магазин цветов!', reply_markup=kb.main)
-    await message.answer_photo('AgACAgQAAxkDAAIIBmbTJM-gFaZ4rETI_X_-ZV_lDnAbAALNtDEbIbJ1UkhHmD2CuCVWAQADAgADdwADNQQ')
+    # await message.answer_photo('AgACAgQAAxkDAAIIBmbTJM-gFaZ4rETI_X_-ZV_lDnAbAALNtDEbIbJ1UkhHmD2CuCVWAQADAgADdwADNQQ')
 
 
 @router.message(F.text == '💐 Каталог')
@@ -123,8 +123,12 @@ async def category(callback: CallbackQuery):
 @router.message(F.text == '🛒 Корзина')
 async def echo(message: types.Message):
     user_id = message.from_user.id
-    # await message.answer(f'user_id: {user_id}')
     cart_products = await rq.get_cart_user(user_id)
+
+    if cart_products is None or len(cart_products) == 0:
+        await message.answer('Ваша корзина пуста')
+        return
+
     for cart_product in cart_products:
         product_id = cart_product.product_id
         cart_product_quantity = await rq.get_cart_product_user(user_id, product_id)
@@ -137,13 +141,24 @@ async def echo(message: types.Message):
                              callback_data=f'delete_{cart_product.id}')]]))
 
 
+
 @router.callback_query(F.data.startswith('delete_'))
 async def delete_product(callback: CallbackQuery):
-    product_name = await rq.get_product(product_id=int(callback.data.split('_')[1]))
-    product_data = await rq.delete_cart_product(pr_id=int(callback.data.split('_')[1]))
+    cart_id = int(callback.data.split('_')[1])
+    user_id = int(callback.from_user.id)
+
+    product_id = await rq.get_cart_id_user(cart_id=cart_id, user_id=user_id)
+
+    # await callback.message.answer (text=f'ИД товара {product_id.product_id}')
+
+    product_name = await rq.get_product(product_id.product_id)
+
+    await rq.delete_cart_product(pr_id=cart_id)
 
     await callback.answer(f'Вы удалили товар: {product_name.name}')
     await callback.message.answer(f'Вы удалили из корзины: {product_name.name}')
+
+
 
 
 @router.message(F.text == '☎️ Контакты')
