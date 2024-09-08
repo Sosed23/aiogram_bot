@@ -29,8 +29,8 @@ class Product(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     description: Mapped[str] = mapped_column(Text)
-    price: Mapped[float] = mapped_column(Numeric(5,2), nullable=False)
-    image: Mapped[str] = mapped_column(String(150))
+    price: Mapped[float] = mapped_column(Numeric(10,2), nullable=False)
+    image: Mapped[str] = mapped_column(String(500))
     category_id: Mapped[int] = mapped_column(ForeignKey('category.id', ondelete='CASCADE'), nullable=False)
 
     category: Mapped['Category'] = relationship(backref='product')

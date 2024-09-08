@@ -30,6 +30,15 @@ async def categories():
     return keydoard.adjust(2).as_markup()
 
 
+async def add_categories():
+    all_categories = await get_categories()
+    keydoard = InlineKeyboardBuilder()
+    for category in all_categories:
+        keydoard.add(InlineKeyboardButton(text=category.name, callback_data=f"addcategory_{category.id}"))
+    # keydoard.add(InlineKeyboardButton(text='На главную', callback_data='to_main'))
+    return keydoard.adjust(2).as_markup()
+
+
 async def products(category_id):
     all_products = await get_category_product(category_id)
     keyboard = InlineKeyboardBuilder()

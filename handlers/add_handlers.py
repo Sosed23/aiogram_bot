@@ -3,7 +3,10 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
+
 import database.query_postgresql as rq
+import keyboards.keyboards as kb
+
 
 router_add = Router()
 
@@ -12,7 +15,7 @@ class Add_product(StatesGroup):
     description = State()
     price = State()
     image = State()
-    category = State()
+    category_id = State()
 
 
 @router_add.message(Command('reg'))
@@ -28,27 +31,62 @@ async def add_prod_name(message: Message, state: FSMContext):
     await message.answer('Введите описание товара')
 
 
-@router_add.message(Add_product.name)
-async def add_prod_name(message: Message, state: FSMContext):
-    await state.update_data(name=message.text)
-    await state.set_state(Add_product.description)
-    await message.answer('Введите описание товара')
+@router_add.message(Add_product.description)
+async def add_prod_description(message: Message, state: FSMContext):
+    await state.update_data(description=message.text)
+    await state.set_state(Add_product.price)
+    await message.answer('Введите стоимость товара')
 
 
-@router_add.message(Add_product.number)
-async def two_three(message: Message, state: FSMContext):
-    await state.update_data(number=message.text)
+@router_add.message(Add_product.price)
+async def add_prod_price(message: Message, state: FSMContext):
+    await state.update_data(price=message.text)
+    await state.set_state(Add_product.image)
+    await message.answer('Введите ссылку на фото товара')
+
+
+@router_add.message(Add_product.image)
+async def add_prod_image(message: Message, state: FSMContext):
+    await state.update_data(image=message.text)
+    await state.set_state(Add_product.category_id)
+    await message.answer('Укажите категорию товара', reply_markup=await kb.add_categories())
+
+
+@router_add.callback_query(F.data.startswith('addcategory_'))
+async def add_prod_category(callback: CallbackQuery, state: FSMContext):
+    category_id = callback.data.split('_')[1]
+    await state.update_data(category_id=int(category_id))
     data = await state.get_data()
     
     product_data = {
         "name": data.get("name"),
-        "description": "default description",  # можно также получить описание из state
-        "price": 0.0,  # можно также получить цену из state
-        "image": "default_image.png",  # можно задать изображение или получить из state
-        "category": 1  # также можно получить категорию из state
+        "description": data.get("description"), 
+        "price": data.get("price"),
+        "image": data.get("image"),
+        "category": data.get("category_id")
     }
     
     await rq.orm_add_product(product_data)
-    await message.answer(f'Спасибо, регистрация звершена.\nИмя: {data["name"]}\nНомер: {data["number"]}')
+    await callback.message.answer(f'Добавлен новый товаар:\nНазвание товара: {data["name"]}\nОписание товара: {data["description"]}\n'
+                         f'Стоимость товара: {data["price"]}\nСсылка на фото товара: {data["image"]}\nКатегория товара: {data["category_id"]}')
     await state.clear()
+
+
+# @router_add.message(Add_product.category_id)
+# async def add_prod_category(message: Message, state: FSMContext):
+#     await state.update_data(category_id=message.text)
+#     data = await state.get_data()
+    
+#     product_data = {
+#         "name": data.get("name"),
+#         "description": data.get("description"), 
+#         "price": data.get("price"),
+#         "image": data.get("image"),
+#         "category": data.get("category_id")
+#     }
+    
+#     await rq.orm_add_product(product_data)
+#     await message.answer(f'Добавлен новый товаар:\nНазвание товара: {data["name"]}\nОписание товара: {data["description"]}\n'
+#                          f'Стоимость товара: {data["price"]}\nСсылка на фото товара: {data["image"]}\nКатегория товара: {data["category_id"]}')
+#     await state.clear()
     

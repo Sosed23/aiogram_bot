@@ -28,6 +28,23 @@ async def get_product(product_id):
         return result.scalar_one_or_none()
 
 
+async def orm_add_product(data: dict):
+    async with session_maker() as session:
+        obj = Product(
+            name=data["name"],
+            description=data["description"],
+            price=float(data["price"]),
+            image=data["image"],
+            category_id=int(data["category"]),
+        )
+        session.add(obj)
+        await session.commit()
+
+
+
+############### ПОЛЬЗОВААТЕЛЬ ################
+
+
 async def add_user(user_id: int, first_name: str, last_name: str):
     async with session_maker() as session:
         user = await session.scalar(select(User).where(User.user_id == user_id))

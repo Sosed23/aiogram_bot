@@ -5,6 +5,7 @@ from aiogram.enums import ParseMode
 from database.engine import create_db, drop_db, session_maker
 # from handlers.user_private import user_private_router
 from handlers.handlers import router
+from handlers.add_handlers import router_add
 
 from dotenv import load_dotenv
 import os
@@ -17,6 +18,8 @@ dp = Dispatcher()
 
 # dp.include_router(user_private_router)
 dp.include_router(router)
+dp.include_router(router_add)
+
 
 
 
