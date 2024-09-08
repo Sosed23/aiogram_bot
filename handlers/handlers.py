@@ -124,22 +124,32 @@ async def category(callback: CallbackQuery):
 async def echo(message: types.Message):
     user_id = message.from_user.id
     cart_products = await rq.get_cart_user(user_id)
-
+    
     if cart_products is None or len(cart_products) == 0:
         await message.answer('Ваша корзина пуста')
         return
 
+
     for cart_product in cart_products:
         product_id = cart_product.product_id
-        cart_product_quantity = await rq.get_cart_product_user(user_id, product_id)
+        
+        cart_product_quantity = cart_product.quantity
+        
+        # cart_product_quantity = await rq.get_cart_product_user(user_id, product_id)
         product = await rq.get_product(product_id)
         category_name = await rq.get_category_name(product.category_id)
+        
+        cart_price = round(cart_product.quantity * cart_product.product.price, 2)
+        
         await message.answer_photo(photo=product.image,
-                            caption=f'Название: {product.name}\nКатегория: {category_name}\nЦена: {product.price}\n'
-                                    f'Кол-во: {cart_product_quantity.quantity} шт.',
+                            caption=f'Название: {product.name}\nКатегория: {category_name}\nЦена: {product.price} руб.\n'
+                                    f'Кол-во: {cart_product_quantity} шт.\nСтоимость: {cart_price} руб.',
                              reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Удалить из корзины',
                              callback_data=f'delete_{cart_product.id}')]]))
 
+    total_price = round(sum(cart.quantity * cart.product.price for cart in cart_products), 2)
+    
+    await message.answer(f'Итоговая стоимость за все товары: <strong>{total_price} руб.</strong>', parse_mode="HTML")
 
 
 @router.callback_query(F.data.startswith('delete_'))

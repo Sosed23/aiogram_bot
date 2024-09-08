@@ -1,5 +1,5 @@
 from aiogram import F, Router, types
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.filters import Command, or_f
 from aiogram.fsm.context import FSMContext
@@ -67,8 +67,15 @@ async def add_prod_category(callback: CallbackQuery, state: FSMContext):
     }
     
     await rq.orm_add_product(product_data)
-    await callback.message.answer(f'Добавлен новый товаар:\nНазвание товара: {data["name"]}\nОписание товара: {data["description"]}\n'
-                         f'Стоимость товара: {data["price"]}\nСсылка на фото товара: {data["image"]}\nКатегория товара: {data["category_id"]}')
+    await callback.message.answer(
+        f'<strong>Добавлен новый товар:</strong>\n'
+        f'Название товара: {data["name"]}\n'
+        f'Описание товара: {data["description"]}\n'
+        f'Стоимость товара: {data["price"]}\n'
+        f'Ссылка на фото товара: {data["image"]}\n'
+        f'Категория товара: {data["category_id"]}',
+        parse_mode="HTML"
+    )
     await state.clear()
 
 

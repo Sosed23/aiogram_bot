@@ -40,7 +40,18 @@ async def orm_add_product(data: dict):
         session.add(obj)
         await session.commit()
 
-
+async def get_products(search_text: str):
+    async with session_maker() as session:
+        # SQL-запрос для поиска товаров по тексту
+        query = f"%{search_text}%"
+        result = await session.execute(f"SELECT * FROM products WHERE name ILIKE :query", {'query': query})
+        products = result.fetchall()
+        
+        # Преобразуем результат в список словарей
+        return [
+            {"id": row.id, "name": row.name, "description": row.description, "price": row.price}
+            for row in products
+        ]
 
 ############### ПОЛЬЗОВААТЕЛЬ ################
 

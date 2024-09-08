@@ -17,8 +17,9 @@ bot = Bot(token=os.environ.get("BOT_TOKEN"))
 dp = Dispatcher()
 
 # dp.include_router(user_private_router)
-dp.include_router(router)
 dp.include_router(router_add)
+dp.include_router(router)
+
 
 
 
